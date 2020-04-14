@@ -34,7 +34,7 @@ $recheckInterval = 10
 $repeat = 1
 
 # PingMonitor
-do{
+while($repeat){
     foreach($monitoring in $monitorList){
         $thisIP   = $monitoring[0]
         $thisName = $monitoring[1]
@@ -49,4 +49,3 @@ do{
     }
     Start-Sleep -Seconds $setInterval
 }
-while($repeat)
