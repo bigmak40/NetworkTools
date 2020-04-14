@@ -30,6 +30,9 @@ $setInterval = 60
 # If it fails on try #1, how long to wait until try #2 (seconds)
 $recheckInterval = 10
 
+# If a Telegram message fails to send, how long until resending (seconds)
+$resendInterval = 2
+
 # Do you want this to repeat (1=yes 0=no)
 $repeat = 1
 
@@ -44,8 +47,12 @@ while($repeat){
                 $now = Get-Date -Format "M/d/yy hh:mm:ss"
                 $Message = "At $($now): Ping error on $($thisIP) [$($thisName)]"
                 Write-Output $Message
-                try { Invoke-RestMethod -Uri "https://api.telegram.org/bot$($MyToken)/sendMessage?chat_id=$($chatID)&text=$($Message)" } 
-                catch { "Well that's a failure..." }
+                try   { Invoke-RestMethod -Uri "https://api.telegram.org/bot$($MyToken)/sendMessage?chat_id=$($chatID)&text=$($Message)" } 
+                catch {
+                        Start-Sleep -Seconds $resendInterval
+                        try   { Invoke-RestMethod -Uri "https://api.telegram.org/bot$($MyToken)/sendMessage?chat_id=$($chatID)&text=$($Message)" }
+                        catch { "Well that's a failure..." }
+                }
             }
         }
     }
