@@ -1,6 +1,6 @@
 # Telegram configuration
-$MyToken = "xxx"
-$chatID = yyy
+$MyToken = ${{ secrets.MY_TELEGRAM_TOKEN }}
+$chatID  = ${{ secrets.MY_TELEGRAM_CHAT_ID }}
 
 # What is being monitored
 $monitorList = @(
