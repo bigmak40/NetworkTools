@@ -27,7 +27,7 @@ $monitorList = @(
 # How often is it being monitored (seconds)
 $setInterval = 60
 
-# If it fails on try #1, how long to wait until try #2
+# If it fails on try #1, how long to wait until try #2 (seconds)
 $recheckInterval = 10
 
 # Do you want this to repeat (1=yes 0=no)
@@ -43,7 +43,9 @@ while($repeat){
             if(!(Test-Connection -ComputerName $thisIP -BufferSize 16 -Count 1 -ea 0 -quiet)){
                 $now = Get-Date -Format "M/d/yy hh:mm:ss"
                 $Message = "At $($now): Ping error on $($thisIP) [$($thisName)]"
-                Invoke-RestMethod -Uri "https://api.telegram.org/bot$($MyToken)/sendMessage?chat_id=$($chatID)&text=$($Message)"
+                Write-Output $Message
+                try { Invoke-RestMethod -Uri "https://api.telegram.org/bot$($MyToken)/sendMessage?chat_id=$($chatID)&text=$($Message)" } 
+                catch { "Well that's a failure..." }
             }
         }
     }
