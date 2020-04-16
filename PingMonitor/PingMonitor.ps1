@@ -1,6 +1,7 @@
 # Telegram configuration
-$MyToken = ${{ secrets.MY_TELEGRAM_TOKEN }}
-$chatID  = ${{ secrets.MY_TELEGRAM_CHAT_ID }}
+$global:MyToken = ${{ secrets.MY_TELEGRAM_TOKEN }}
+$global:chatID  = ${{ secrets.MY_TELEGRAM_CHAT_ID }}
+$global:resendInterval = 2
 
 # What is being monitored
 $monitorList = @(
@@ -22,58 +23,65 @@ $monitorList = @(
                   ("IP",  "192.168.4.14",  "Dahua Twin 1 (Garage Left)"),
                   ("IP",  "192.168.4.15",  "Dahua PTZ 2 (Garage Left)"),
                   ("IP",  "192.168.4.16",  "Dahua Turret 2 (TBD Location)"),
-                  ("SVC", "blueiris",      "Blue Iris Service")
+                  ("SVC", "defragsvc",      "Blue Iris Service")
                 )
 
 # How often is it being monitored (seconds)
-$setInterval = 60
+$setInterval = 5
 
 # If it fails on try #1, how long to wait until try #2 (seconds)
 $recheckInterval = 10
 
-# If a Telegram message fails to send, how long until resending (seconds)
-$resendInterval = 2
-
 # Do you want this to repeat (1=yes 0=no)
 $repeat = 1
 
-# PingMonitor
-while($repeat){
+#################################################
+# SendTelegramMessage function
+Function SendTelegramMessage($Message){
+    try   { Invoke-RestMethod -Uri "https://api.telegram.org/bot$($MyToken)/sendMessage?chat_id=$($chatID)&text=$($Message)" | Out-Null} 
+	catch { 
+			Start-Sleep -Seconds $resendInterval
+            try   { Invoke-RestMethod -Uri "https://api.telegram.org/bot$($MyToken)/sendMessage?chat_id=$($chatID)&text=$($Message)" | Out-Null}
+            catch { "Well that's a failure..." }
+          }
+}
+
+#################################################
+# PingMonitor body
+while(1){
     foreach($monitoring in $monitorList){
         $thisType = $monitoring[0]
         $thisID   = $monitoring[1]
         $thisName = $monitoring[2]
 
-        # see if ip
+        # subroutine if ip
         if($thisType -eq "IP"){
             if(!(Test-Connection -ComputerName $thisID -BufferSize 16 -Count 1 -ea 0 -quiet)){
-               Start-Sleep -Seconds $recheckInterval
-               if(!(Test-Connection -ComputerName $thisID -BufferSize 16 -Count 1 -ea 0 -quiet)){
-                   $now = Get-Date -Format "M/d/yy hh:mm:ss"
-                   $Message = "At $($now): Ping error on $($thisID) [$($thisName)]"
-                   Write-Output $Message
-                   try   { Invoke-RestMethod -Uri "https://api.telegram.org/bot$($MyToken)/sendMessage?chat_id=$($chatID)&text=$($Message)" } 
-                   catch {
-                           Start-Sleep -Seconds $resendInterval
-                           try   { Invoke-RestMethod -Uri "https://api.telegram.org/bot$($MyToken)/sendMessage?chat_id=$($chatID)&text=$($Message)" }
-                           catch { "Well that's a failure..." }
-                   }
-               }
-          }
-         # see if service
-         if($thisType -eq "SVC" ){
-             if(){
-                 $now = Get-Date -Format "M/d/yy hh:mm:ss"
-                 $Message = "At $($now): Ping error on $($thisID) [$($thisName)]"
-                 try   { Invoke-RestMethod -Uri "https://api.telegram.org/bot$($MyToken)/sendMessage?chat_id=$($chatID)&text=$($Message)" } 
-                 catch {
-                         Start-Sleep -Seconds $resendInterval
-                         try   { Invoke-RestMethod -Uri "https://api.telegram.org/bot$($MyToken)/sendMessage?chat_id=$($chatID)&text=$($Message)" }
-                         catch { "Well that's a failure..." }
-                       }
-                 }
-              }
-          }
+            Start-Sleep -Seconds $recheckInterval
+                if(!(Test-Connection -ComputerName $thisID -BufferSize 16 -Count 1 -ea 0 -quiet)){
+                    $now = Get-Date -Format "M/d/yy HH:mm:ss"
+                    $Message = "At $($now): Ping error on $($thisID) [$($thisName)]"
+                   #Write-Output $Message
+					SendTelegramMessage($Message)
+                }
+            }
+        }
+
+        # subroutine if service
+        elseif($thisType -eq "SVC" ){
+            if((Get-Service $thisID).Status -eq "Stopped"){
+                $now = Get-Date -Format "M/d/yy HH:mm:ss"
+                $Message = "At $($now): Service stopped $($thisID) [$($thisName)]"
+			    #Write-Output $Message
+                SendTelegramMessage($Message)
+			}
+        }
     }
+	
+    # stop running if this is set to not repeat
+    if(!$repeat){break}
+
+    # pause before restarting
     Start-Sleep -Seconds $setInterval
 }
+#################################################
