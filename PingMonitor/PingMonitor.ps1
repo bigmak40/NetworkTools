@@ -20,6 +20,7 @@ $monitorList = @(
     ("IP",  "192.168.1.8",   "Ubiquiti US-8-150W (Garage Attic)"),
    #("IP",  "192.168.1.9",   "Ubiquiti US-8-60W (Family Room)"),
     ("IP",  "192.168.1.112", "Pihole Primary (Dell T30)"),
+    ("IP",  "192.168.1.111", "Pihole Backup (i5 NUC)"),
     ("IP",  "192.168.4.7",   "UVC G3 Micro 1 (Nursery)"),
    #("IP",  "192.168.4.8",   "UVC G3 Flex 1 (Family Room)"),
     ("IP",  "192.168.4.9",   "UVC G3 Flex 2 (Kitchen)"),
