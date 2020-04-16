@@ -11,7 +11,7 @@ $recheckInterval = 10 # If it fails on try #1, how long to wait until try #2 (se
 #################################################
 # Monitoring list
 $monitorList = @(
-				("IP",  "192.168.1.1",   "Ubiquiti USG Router"),
+		("IP",  "192.168.1.1",   "Ubiquiti USG Router"),
                 ("IP",  "192.168.1.2",   "Ubiquiti UAP-AC-Pro (Upstairs)"),
                 ("IP",  "192.168.1.3",   "Ubiquiti UAP-AC-Pro (Downstairs)"),
                 ("IP",  "192.168.1.4",   "Ubiquiti UAP-AC-M (Front Yard)"),
@@ -23,7 +23,7 @@ $monitorList = @(
                 ("IP",  "192.168.4.7",   "UVC G3 Micro 1 (Nursery)"),
                #("IP",  "192.168.4.8",   "UVC G3 Flex 1 (Family Room)"),
                 ("IP",  "192.168.4.9",   "UVC G3 Flex 2 (Kitchen)"),
-			    ("IP",  "192.168.4.10",  "UVC G3 Pro 1 (Garage Inside)"),
+	        ("IP",  "192.168.4.10",  "UVC G3 Pro 1 (Garage Inside)"),
                 ("IP",  "192.168.4.12",  "Dahua Turret 1 (Garage Center)"),
                 ("IP",  "192.168.4.13",  "Dahua PTZ 1 (Garage Right)"),
                 ("IP",  "192.168.4.14",  "Dahua Twin 1 (Garage Left)"),
